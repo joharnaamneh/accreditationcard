@@ -1,0 +1,204 @@
+<!-- card-editor.component.html -->
+<div class="editor-container">
+  <!-- Editor Header -->
+  <div class="editor-header">
+    <h2>🎨 Karten Template Editor</h2>
+
+    <!-- Format Selection -->
+    <div class="format-selector">
+      <label>Format:</label>
+      <select [(ngModel)]="selectedFormat" (ngModelChange)="onFormatChange()" class="format-select">
+        <option *ngFor="let format of availableFormats" [ngValue]="format">
+          {{format.name}} ({{format.width}}×{{format.height}}mm)
+        </option>
+      </select>
+    </div>
+
+    <!-- Seiten-Wechsel -->
+    <div class="side-switcher">
+      <button (click)="switchSide('front')" [class.active]="currentSide === 'front'" class="side-btn">
+        📄 Vorderseite
+      </button>
+      <button (click)="switchSide('back')" [class.active]="currentSide === 'back'" class="side-btn">
+        📄 Rückseite
+      </button>
+    </div>
+
+    <!-- Template Aktionen -->
+    <div class="template-actions">
+      <button (click)="togglePreview()" class="btn-preview">
+        👁️ {{showPreview ? 'Editor' : 'Preview'}}
+      </button>
+      <button (click)="exportTemplate()" class="btn-export">🚀 Template Anwenden</button>
+      <button (click)="saveTemplate()" class="btn-save">💾 Template Speichern</button>
+      <input type="file" (change)="loadTemplate($event)" accept=".json" style="display:none" #fileInput>
+      <button (click)="fileInput.click()" class="btn-load">📂 Template Laden</button>
+    </div>
+  </div>
+
+  <div class="editor-content">
+    <!-- Linke Spalte: Werkzeuge und Eigenschaften -->
+    <div class="editor-sidebar" *ngIf="!showPreview">
+      <!-- Verfügbare Datentypen -->
+      <div class="tool-section">
+        <h3>🧰 Verfügbare Elemente</h3>
+        <div class="element-tools">
+          <div *ngFor="let dataType of availableDataTypes"
+               class="tool-item"
+               draggable="true"
+               (dragstart)="onDragStart(dataType.type)">
+            <span class="tool-icon">{{dataType.icon}}</span>
+            <span class="tool-label">{{dataType.label}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Element-Eigenschaften -->
+      <div class="property-section" *ngIf="selectedElement">
+        <h3>⚙️ Element Eigenschaften</h3>
+
+        <div class="property-group">
+          <label>Label:</label>
+          <input [(ngModel)]="selectedElement.label"
+                 (ngModelChange)="updateElement()"
+                 class="property-input">
+        </div>
+
+        <div class="property-group">
+          <label>Daten-Key:</label>
+          <select [(ngModel)]="selectedElement.dataKey"
+                  (ngModelChange)="updateElement()"
+                  class="property-select">
+            <option *ngFor="let key of availableKeys" [value]="key">{{key}}</option>
+          </select>
+        </div>
+
+        <div class="property-row">
+          <div class="property-group">
+            <label>X:</label>
+            <input type="number"
+                   [(ngModel)]="selectedElement.x"
+                   (ngModelChange)="updateElement()"
+                   class="property-input-small">
+          </div>
+          <div class="property-group">
+            <label>Y:</label>
+            <input type="number"
+                   [(ngModel)]="selectedElement.y"
+                   (ngModelChange)="updateElement()"
+                   class="property-input-small">
+          </div>
+        </div>
+
+        <div class="property-row">
+          <div class="property-group">
+            <label>Breite:</label>
+            <input type="number"
+                   [(ngModel)]="selectedElement.width"
+                   (ngModelChange)="updateElement()"
+                   class="property-input-small">
+          </div>
+          <div class="property-group">
+            <label>Höhe:</label>
+            <input type="number"
+                   [(ngModel)]="selectedElement.height"
+                   (ngModelChange)="updateElement()"
+                   class="property-input-small">
+          </div>
+        </div>
+
+        <div class="property-group" *ngIf="selectedElement.type !== 'image'">
+          <label>Schriftgröße:</label>
+          <input type="number"
+                 [(ngModel)]="selectedElement.fontSize"
+                 (ngModelChange)="updateElement()"
+                 class="property-input-small"
+                 min="8"
+                 max="48">
+        </div>
+
+        <!-- Spezielle Eigenschaften für Multiselect/Dropdown -->
+        <div class="property-group" *ngIf="selectedElement.type === 'multiselect' || selectedElement.type === 'dropdown'">
+          <label>Optionen (kommagetrennt):</label>
+          <textarea [(ngModel)]="selectedElement.options"
+                    (ngModelChange)="updateElement()"
+                    class="property-textarea"
+                    placeholder="Option1,Option2,Option3"></textarea>
+        </div>
+
+        <div class="property-actions">
+          <button (click)="deleteElement(selectedElement)" class="btn-delete">🗑️ Löschen</button>
+        </div>
+      </div>
+
+      <!-- JSON Daten -->
+      <div class="data-section">
+        <h3>📊 Verfügbare Daten-Keys</h3>
+        <div class="data-keys">
+          <span *ngFor="let key of availableKeys" class="data-key">{{key}}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rechte Spalte: Canvas oder Preview -->
+    <div class="editor-canvas">
+      <div class="canvas-header">
+        <h4>
+          {{showPreview ? 'Preview' : (currentSide === 'front' ? 'Vorderseite' : 'Rückseite')}} -
+          {{selectedFormat.name}}
+        </h4>
+      </div>
+
+      <!-- Editor Canvas -->
+      <div class="card-canvas"
+           *ngIf="!showPreview"
+           (dragover)="onDragOver($event)"
+           (drop)="onDrop($event)"
+           [style.width.px]="selectedFormat.width * 3"
+           [style.height.px]="selectedFormat.height * 3">
+
+        <!-- Platzhalter für aktuelle Seite -->
+        <div *ngFor="let element of getCurrentSideElements()"
+             class="placeholder-element"
+             [class.selected]="selectedElement?.id === element.id"
+             (click)="selectElement(element)"
+             (mousedown)="onElementMouseDown($event, element)"
+             [style.left.px]="element.x"
+             [style.top.px]="element.y"
+             [style.width.px]="element.width"
+             [style.height.px]="element.height"
+             [style.font-size.px]="element.fontSize || 14">
+
+          <div class="element-content" *ngIf="element.type !== 'image'">
+            {{getElementValue(element) || element.label}}
+          </div>
+
+          <img *ngIf="element.type === 'image'"
+               [src]="getElementValue(element)"
+               [alt]="element.label"
+               class="element-image"
+               onerror="this.style.display='none'">
+
+          <div class="element-controls" *ngIf="selectedElement?.id === element.id">
+            <button (click)="deleteElement(element)" class="control-btn">❌</button>
+          </div>
+        </div>
+
+        <!-- Drop-Zone Hilfe -->
+        <div class="drop-hint" *ngIf="isDragging">
+          📍 Element hier ablegen
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div class="preview-container" *ngIf="showPreview">
+        <div class="preview-card"
+             [style.width.px]="selectedFormat.width * 2"
+             [style.height.px]="selectedFormat.height * 2">
+
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

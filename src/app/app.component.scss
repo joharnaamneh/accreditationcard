@@ -1,0 +1,358 @@
+// app.component.scss
+.app-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.app-header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 1.5rem 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+
+  h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .view-toggle {
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.25rem;
+    border-radius: 25px;
+    backdrop-filter: blur(5px);
+
+    .toggle-btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 20px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: transparent;
+      color: #495057;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-1px);
+      }
+
+      &.active {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      }
+    }
+  }
+}
+
+.main-content {
+  padding: 2rem;
+}
+
+.view-mode {
+  .card-selector {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+    h3 {
+      margin: 0 0 1.5rem 0;
+      color: #495057;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .selector-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+
+      button {
+        padding: 0.75rem 1.25rem;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+        color: #495057;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        &.active {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        &.btn-athlete {
+          &.active {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border-color: #28a745;
+          }
+        }
+
+        &.btn-official {
+          &.active {
+            background: linear-gradient(45deg, #007bff, #6610f2);
+            color: white;
+            border-color: #007bff;
+          }
+        }
+
+        &.btn-media {
+          &.active {
+            background: linear-gradient(45deg, #ffc107, #fd7e14);
+            color: #212529;
+            border-color: #ffc107;
+          }
+        }
+
+        &.btn-vip {
+          &.active {
+            background: linear-gradient(45deg, #dc3545, #e83e8c);
+            color: white;
+            border-color: #dc3545;
+          }
+        }
+
+        &.btn-staff {
+          &.active {
+            background: linear-gradient(45deg, #6c757d, #495057);
+            color: white;
+            border-color: #6c757d;
+          }
+        }
+
+        &.btn-delegate {
+          &.active {
+            background: linear-gradient(45deg, #17a2b8, #20c997);
+            color: white;
+            border-color: #17a2b8;
+          }
+        }
+      }
+    }
+  }
+
+  .current-card-section {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #e9ecef;
+
+      h3 {
+        margin: 0;
+        color: #495057;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      .card-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+
+        .btn-action {
+          padding: 0.6rem 1.2rem;
+          border: none;
+          border-radius: 8px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-size: 0.875rem;
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+          }
+
+          &.btn-primary {
+            background: linear-gradient(45deg, #007bff, #6610f2);
+            color: white;
+          }
+
+          &.btn-secondary {
+            background: linear-gradient(45deg, #6c757d, #495057);
+            color: white;
+          }
+
+          &.btn-warning {
+            background: linear-gradient(45deg, #ffc107, #fd7e14);
+            color: #212529;
+          }
+        }
+      }
+    }
+
+    .custom-preview {
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: rgba(0, 0, 0, 0.02);
+      border-radius: 10px;
+      border: 2px dashed #28a745;
+
+      h4 {
+        margin: 0 0 1rem 0;
+        color: #28a745;
+        font-weight: 600;
+      }
+
+      .custom-card-container {
+        display: flex;
+        justify-content: center;
+      }
+    }
+  }
+
+  .global-actions {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+    h3 {
+      margin: 0 0 1.5rem 0;
+      color: #495057;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .global-buttons {
+      display: flex;
+      gap: 1rem;
+
+      .btn-global {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+
+        &:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        &.btn-success {
+          background: linear-gradient(45deg, #28a745, #20c997);
+          color: white;
+        }
+
+        &.btn-info {
+          background: linear-gradient(45deg, #17a2b8, #6f42c1);
+          color: white;
+        }
+      }
+    }
+  }
+}
+
+.edit-mode {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(15px);
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+// Responsive Design
+@media (max-width: 1200px) {
+  .app-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .view-mode .current-card-section .card-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+
+    .card-actions {
+      justify-content: center;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1rem;
+  }
+
+  .app-header {
+    padding: 1rem;
+
+    h1 {
+      font-size: 1.5rem;
+    }
+
+    .view-toggle .toggle-btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  .view-mode {
+    .card-selector .selector-buttons button {
+      flex: 1 1 calc(50% - 0.375rem);
+      min-width: 0;
+      font-size: 0.875rem;
+      padding: 0.6rem 0.8rem;
+    }
+
+    .current-card-section .card-header .card-actions {
+      flex-direction: column;
+
+      .btn-action {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    .global-actions .global-buttons {
+      flex-direction: column;
+
+      .btn-global {
+        width: 100%;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .view-mode .card-selector .selector-buttons button {
+    flex: 1 1 100%;
+  }
+}

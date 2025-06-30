@@ -1,0 +1,122 @@
+<!-- accreditationcard.component.html -->
+<div class="card-container">
+  <!-- Front of card -->
+  <div class="card front" [attr.data-function]="data.function">
+    <div class="event-header">
+      <div class="swiss-flag"></div>
+      <span class="event-title">
+        5th CISM<br>
+        Military World Winter Games<br>
+        2025
+      </span>
+      <div class="cism-logo"></div>
+    </div>
+
+    <div class="main-content">
+      <div class="photo-section">
+        <img [src]="data.imageUrl" alt="Portrait" class="portrait">
+      </div>
+
+      <div class="person-info">
+        <p class="rank"><strong>{{ data.rank }}</strong></p>
+        <h2 class="name">{{ data.name }}</h2>
+        <p class="role">{{ data.role }}</p>
+        <p class="discipline">{{ data.discipline }}</p>
+        <p class="subdiscipline">{{ data.subdiscipline }}</p>
+      </div>
+    </div>
+
+    <div class="accreditation-section">
+      <div class="accreditation-badges">
+        <span class="badge accred" [style.background-color]="getFunctionColor()">
+          {{ data.accreditation }}
+        </span>
+        <span class="badge country">{{ data.country_code }}</span>
+      </div>
+      <p class="country-name"><strong>{{ data.country.toUpperCase() }}</strong></p>
+    </div>
+
+    <div class="zones">
+      <span *ngFor="let zone of data.zones"
+            class="zone"
+            [class.vip]="zone === 'VIP'">
+        {{ zone }}
+      </span>
+    </div>
+
+    <div class="card-footer">
+
+
+      <div class="event-logo">
+        <img [src]="data.eventImageUrl" alt="Event Logo" class="event-image">
+      </div>
+    </div>
+  </div>
+
+  <!-- Back of card -->
+  <div class="card back" [attr.data-function]="data.function">
+    <div class="qr-section">
+      <div class="qr-container">
+        <img [src]="data.qr_sbb" alt="QR SBB">
+        <div class="qr-label sbb">SBB CFF FFS</div>
+      </div>
+      <div class="qr-container">
+        <img [src]="data.qr_event" alt="QR Event">
+        <div class="qr-label event">Event-Website</div>
+      </div>
+    </div>
+
+    <div class="info-sections">
+      <div class="info-group">
+        <div class="info-title">LU</div>
+        <div class="info-content">
+          Lucerne<br>
+          Main venue for events<br>
+          Access with accreditation
+        </div>
+      </div>
+
+      <div class="info-group">
+        <div class="info-title">🍴</div>
+        <div class="info-content">
+          Food at accommodation<br>
+          Breakfast: 06:30-09:00<br>
+          Lunch: 12:00-14:00<br>
+          Dinner: 18:00-20:00
+        </div>
+      </div>
+
+      <div class="info-group">
+        <div class="info-title">🚌</div>
+        <div class="info-content">
+          Shuttle Service<br>
+          Every 30 minutes<br>
+          Hotel ↔ Venues<br>
+          06:00-22:00
+        </div>
+      </div>
+
+      <div class="info-group emergency">
+        <div class="info-title">144</div>
+        <div class="info-content">
+          Ambulance<br>
+          Emergency: 144<br>
+          Police: 117<br>
+          Fire: 118<br>
+          Event Control: +41 41 123 45 67<br>
+          Medical Center: Venue A, Level 1<br>
+          Lost & Found: Info Desk
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-logos">
+      <span class="sponsor">Swisscom</span>
+      <span class="transport">SBB CFF FFS</span>
+    </div>
+
+    <div class="card-id">
+      ID: {{ data.cardId }}
+    </div>
+  </div>
+</div>

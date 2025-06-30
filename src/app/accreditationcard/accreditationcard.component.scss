@@ -1,0 +1,337 @@
+// accreditationcard.component.scss
+.card-container {
+  display: flex;
+  gap: 2rem;
+  font-family: Arial, sans-serif;
+  margin: 1rem 0;
+}
+
+.card {
+  border: 2px solid #000;
+  width: 350px;
+  height: 550px;
+  background: #e6f3ff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+
+  // Function-based color coding
+  &[data-function="athlete"] { border-left: 6px solid #28a745; }
+  &[data-function="official"] { border-left: 6px solid #007bff; }
+  &[data-function="media"] { border-left: 6px solid #ffc107; }
+  &[data-function="vip"] { border-left: 6px solid #dc3545; }
+  &[data-function="staff"] { border-left: 6px solid #6c757d; }
+  &[data-function="delegate"] { border-left: 6px solid #17a2b8; }
+}
+
+.front {
+  .event-header {
+    background: #fff;
+    padding: 0.75rem;
+    margin: -2px -2px 0 -2px;
+    border-bottom: 2px solid #000;
+    text-align: center;
+    position: relative;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .swiss-flag {
+      position: absolute;
+      left: 1rem;
+      width: 30px;
+      height: 20px;
+      background: red;
+
+      &::before,
+      &::after {
+        content: '';
+        position: absolute;
+        background: white;
+      }
+
+      &::before {
+        width: 6px;
+        height: 20px;
+        left: 12px;
+        top: 0;
+      }
+
+      &::after {
+        width: 30px;
+        height: 6px;
+        top: 7px;
+        left: 0;
+      }
+    }
+
+    .event-title {
+      font-weight: bold;
+      font-size: 0.85rem;
+      line-height: 1.2;
+    }
+
+    .cism-logo {
+      position: absolute;
+      right: 1rem;
+      width: 30px;
+      height: 30px;
+      background: orange;
+      border-radius: 50%;
+    }
+  }
+
+  .main-content {
+    padding: 1.5rem 1rem 1rem;
+    display: flex;
+    gap: 1rem;
+
+    .photo-section {
+      flex-shrink: 0;
+
+      .portrait {
+        width: 80px;
+        height: 100px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        object-fit: cover;
+      }
+    }
+
+    .person-info {
+      flex: 1;
+
+      .rank {
+        margin: 0 0 0.3rem 0;
+        font-size: 0.9rem;
+        color: #666;
+      }
+
+      .name {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin: 0 0 0.5rem 0;
+        line-height: 1.2;
+      }
+
+      .role, .discipline, .subdiscipline {
+        margin: 0.2rem 0;
+        font-size: 0.85rem;
+        color: #333;
+      }
+    }
+  }
+
+  .accreditation-section {
+    padding: 0 1rem;
+    margin-bottom: 1rem;
+
+    .accreditation-badges {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+
+      .badge {
+        padding: 0.4rem 1rem;
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: white;
+        border-radius: 4px;
+
+        &.country {
+          background: #1e3a8a;
+        }
+      }
+    }
+
+    .country-name {
+      margin: 0;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+  }
+
+  .zones {
+    padding: 0 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+
+    .zone {
+      background: #fff;
+      border: 1px solid #ccc;
+      color: #333;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 500;
+
+      &.vip {
+        background: #ff6600;
+        color: white;
+        font-weight: bold;
+      }
+    }
+  }
+
+  .card-footer {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+
+    .bottom-numbers {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      .number-group {
+        display: flex;
+        gap: 0.2rem;
+
+        &.left, &.right {
+          .number {
+            background: #000;
+          }
+        }
+      }
+
+      .number {
+        background: #333;
+        color: white;
+        width: 22px;
+        height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: bold;
+        border-radius: 2px;
+
+        &.center {
+          background: #000;
+          font-size: 1rem;
+        }
+      }
+    }
+
+    .event-logo {
+      text-align: center;
+
+      .event-image {
+        max-width: 120px;
+        max-height: 40px;
+        object-fit: contain;
+      }
+    }
+  }
+}
+
+.back {
+  background: #f8f9fa;
+  padding: 1rem;
+
+  .qr-section {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    justify-content: center;
+
+    .qr-container {
+      text-align: center;
+
+      img {
+        width: 80px;
+        height: 80px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      .qr-label {
+        font-size: 0.7rem;
+        margin-top: 0.3rem;
+        padding: 0.2rem 0.4rem;
+        border-radius: 3px;
+        font-weight: bold;
+
+        &.sbb {
+          background: #ff6600;
+          color: white;
+        }
+
+        &.event {
+          background: #ffd700;
+          color: #000;
+        }
+      }
+    }
+  }
+
+  .info-sections {
+    .info-group {
+      margin: 0.8rem 0;
+      padding: 0.6rem;
+      background: #e6f3ff;
+      border-left: 4px solid #0066cc;
+      border-radius: 4px;
+
+      &.emergency {
+        border-left-color: #dc3545;
+        background: #fff5f5;
+      }
+
+      .info-title {
+        font-weight: bold;
+        font-size: 0.9rem;
+        margin-bottom: 0.3rem;
+        color: #0066cc;
+      }
+
+      .info-content {
+        font-size: 0.75rem;
+        color: #555;
+        line-height: 1.3;
+      }
+    }
+  }
+
+  .footer-logos {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid #ccc;
+
+    .sponsor, .transport {
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: #666;
+    }
+  }
+
+  .card-id {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 1rem;
+    font-size: 0.7rem;
+    color: #999;
+    font-family: monospace;
+  }
+}
+
+// Print styles
+@media print {
+  .card-container {
+    gap: 1rem;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 2px solid #000;
+  }
+}
