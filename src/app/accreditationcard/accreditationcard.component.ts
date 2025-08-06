@@ -1,6 +1,6 @@
 // accreditationcard.component.ts
 import { Component, Input, ViewChild, ElementRef } from '@angular/core';
-import { Accreditation, FUNCTION_COLORS } from '../shared/models/accreditation.model';
+import { AccreditationData, FUNCTION_COLORS } from '../shared/models/accreditation.model';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -11,7 +11,7 @@ import html2canvas from 'html2canvas';
   styleUrl: './accreditationcard.component.scss'
 })
 export class AccreditationCardComponent {
-  @Input() data!: Accreditation;
+  @Input() data!: AccreditationData;
   @ViewChild('cardWrapper', { static: false }) cardWrapper!: ElementRef;
 
   getFunctionColor(): string {
@@ -51,7 +51,6 @@ export class AccreditationCardComponent {
       const imgWidth = canvas.width;
       const imgHeight = canvas.height;
       const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-
       const scaledWidth = imgWidth * ratio;
       const scaledHeight = imgHeight * ratio;
 
@@ -64,7 +63,6 @@ export class AccreditationCardComponent {
       // Generate filename
       const fileName = `${this.data.name.replace(/\s+/g, '_')}_${this.data.function}_card.pdf`;
       pdf.save(fileName);
-
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Error generating PDF. Please try again.');
@@ -114,26 +112,25 @@ export class AccreditationCardComponent {
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
-        <head>
-          <title>Accreditation Card - ${this.data.name}</title>
-          <style>
-            ${styles}
-            body { margin: 20px; font-family: Arial, sans-serif; }
-            @media print {
-              body { margin: 0; }
-              .card-container { gap: 1rem; }
-            }
-          </style>
-        </head>
-        <body>
-          ${cardHTML}
-        </body>
+      <head>
+        <title>Accreditation Card - ${this.data.name}</title>
+        <style>
+          ${styles}
+          body { margin: 20px; font-family: Arial, sans-serif; }
+          @media print {
+            body { margin: 0; }
+            .card-container { gap: 1rem; }
+          }
+        </style>
+      </head>
+      <body>
+        ${cardHTML}
+      </body>
       </html>
     `);
 
     printWindow.document.close();
     printWindow.focus();
-
     setTimeout(() => {
       printWindow.print();
       printWindow.close();

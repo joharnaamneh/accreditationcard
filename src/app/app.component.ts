@@ -1,7 +1,9 @@
 // app.component.ts
-import { Component, ViewChild } from '@angular/core';
-import { Accreditation, SAMPLE_ACCREDITATIONS } from './shared/models/accreditation.model';
+import { Component, ViewChild, OnInit, OnDestroy } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
+import { AccreditationCard, AccreditationData, TemplateUtils } from './shared/models/accreditation.model';
 import { AccreditationCardComponent } from './accreditationcard/accreditationcard.component';
+import { AccreditationService } from './shared/services/accreditationcard.service';
 
 @Component({
   selector: 'app-root',
@@ -9,15 +11,17 @@ import { AccreditationCardComponent } from './accreditationcard/accreditationcar
   standalone: false,
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
   @ViewChild('accreditationCard') accreditationCardComponent!: AccreditationCardComponent;
 
-  // Sample cards data
-  sampleCards: Accreditation[] = SAMPLE_ACCREDITATIONS;
+  // Observable data
+  cards: AccreditationCard[] = [];
+  currentCard: AccreditationCard | null = null;
+  currentCardData: AccreditationData | null = null;
+  isLoading = false;
 
-  // Currently selected card
+  // Currently selected card index
   selectedCardIndex: number = 0;
-  currentCard: Accreditation = this.sampleCards[0];
 
   // View mode: 'view' or 'edit'
   viewMode: 'view' | 'edit' = 'view';
@@ -26,12 +30,49 @@ export class AppComponent {
   customCardHtml: string = '';
   customCardCss: string = '';
 
+  // Component lifecycle
+  private destroy$ = new Subject<void>();
+
+  constructor(private accreditationService: AccreditationService) {}
+
+  ngOnInit(): void {
+    // Subscribe to cards
+    this.accreditationService.cards$.pipe(takeUntil(this.destroy$)).subscribe(cards => {
+      this.cards = cards;
+      if (cards.length > 0 && !this.currentCard) {
+        this.selectCard(0);
+      }
+    });
+
+    // Subscribe to current card
+    this.accreditationService.currentCard$.pipe(takeUntil(this.destroy$)).subscribe(card => {
+      this.currentCard = card;
+      if (card) {
+        this.currentCardData = this.accreditationService.parseCardData(card);
+        // Find the index of current card
+        this.selectedCardIndex = this.cards.findIndex(c => c.uuid === card.uuid);
+      }
+    });
+
+    // Subscribe to loading state
+    this.accreditationService.loading$.pipe(takeUntil(this.destroy$)).subscribe(loading => {
+      this.isLoading = loading;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   selectCard(index: number): void {
-    this.selectedCardIndex = index;
-    this.currentCard = this.sampleCards[index];
-    // Reset custom HTML/CSS when switching cards
-    this.customCardHtml = '';
-    this.customCardCss = '';
+    if (index >= 0 && index < this.cards.length) {
+      this.selectedCardIndex = index;
+      this.accreditationService.setCurrentCard(this.cards[index]);
+      // Reset custom HTML/CSS when switching cards
+      this.customCardHtml = '';
+      this.customCardCss = '';
+    }
   }
 
   switchToEditMode(): void {
@@ -46,16 +87,20 @@ export class AppComponent {
     this.customCardHtml = data.html;
     this.customCardCss = data.css;
     console.log('Card updated:', data);
-
-    // Optionally switch back to view mode to see the changes
-    // this.switchToViewMode();
   }
 
-  onCardDataUpdated(data: Accreditation): void {
-    // Update the current card data
-    this.currentCard = { ...data };
-    this.sampleCards[this.selectedCardIndex] = { ...data };
-    console.log('Card data updated:', data);
+  onCardDataUpdated(data: AccreditationData): void {
+    if (this.currentCard) {
+      this.accreditationService.updateCard(this.currentCard.uuid, data).subscribe({
+        next: (updatedCard) => {
+          console.log('Card data updated successfully:', updatedCard);
+        },
+        error: (error) => {
+          console.error('Error updating card:', error);
+          alert('Error updating card. Please try again.');
+        }
+      });
+    }
   }
 
   async exportCurrentCardAsPDF(): Promise<void> {
@@ -76,42 +121,116 @@ export class AppComponent {
     }
   }
 
-  // Save all cards to local storage (since we can't use browser storage in artifacts, this would be for real implementation)
+  // Save all cards to backend (they're already saved via service)
   saveCardsToStorage(): void {
-    console.log('Saving cards to storage:', this.sampleCards);
-    // In a real app, you'd save to localStorage or send to a server
-    alert('Cards saved successfully!');
+    // Cards are automatically saved to backend via service
+    // This could trigger a refresh or show a success message
+    console.log('Cards are automatically saved to backend');
+    alert('Cards are automatically synchronized with the server!');
   }
 
-  // Load cards from storage
+  // Refresh cards from backend
   loadCardsFromStorage(): void {
-    console.log('Loading cards from storage');
-    // In a real app, you'd load from localStorage or fetch from a server
-    alert('Cards loaded successfully!');
+    this.accreditationService.getAllCards().subscribe({
+      next: (cards) => {
+        console.log('Cards refreshed from server:', cards);
+        alert('Cards refreshed from server successfully!');
+      },
+      error: (error) => {
+        console.error('Error loading cards:', error);
+        alert('Error loading cards from server. Please try again.');
+      }
+    });
   }
 
   // Create a new card based on the current one
   duplicateCurrentCard(): void {
-    const newCard: Accreditation = {
-      ...this.currentCard,
-      name: this.currentCard.name + ' (Copy)',
-      cardId: 'CARD-' + String(Date.now()).slice(-6)
-    };
-
-    this.sampleCards.push(newCard);
-    this.selectCard(this.sampleCards.length - 1);
-    alert('Card duplicated successfully!');
+    if (this.currentCard) {
+      this.accreditationService.duplicateCard(this.currentCard).subscribe({
+        next: (newCard) => {
+          console.log('Card duplicated successfully:', newCard);
+          // The service automatically updates the cards list and sets the new card as current
+          alert('Card duplicated successfully!');
+        },
+        error: (error) => {
+          console.error('Error duplicating card:', error);
+          alert('Error duplicating card. Please try again.');
+        }
+      });
+    }
   }
 
-  // Reset current card to default
+  // Reset current card to a default state
   resetCurrentCard(): void {
-    if (confirm('Are you sure you want to reset this card to its original state?')) {
-      const originalIndex = this.selectedCardIndex;
-      this.currentCard = { ...SAMPLE_ACCREDITATIONS[originalIndex] };
-      this.sampleCards[originalIndex] = { ...SAMPLE_ACCREDITATIONS[originalIndex] };
-      this.customCardHtml = '';
-      this.customCardCss = '';
-      alert('Card reset successfully!');
+    if (this.currentCard && confirm('Are you sure you want to reset this card to a default state?')) {
+      const defaultTemplate = TemplateUtils.createDefaultTemplate();
+      this.accreditationService.updateCard(this.currentCard.uuid, defaultTemplate).subscribe({
+        next: (updatedCard) => {
+          this.customCardHtml = '';
+          this.customCardCss = '';
+          console.log('Card reset successfully:', updatedCard);
+          alert('Card reset successfully!');
+        },
+        error: (error) => {
+          console.error('Error resetting card:', error);
+          alert('Error resetting card. Please try again.');
+        }
+      });
     }
+  }
+
+  // Create a new empty card
+  createNewCard(): void {
+    this.accreditationService.createEmptyCard().subscribe({
+      next: (newCard) => {
+        console.log('New card created successfully:', newCard);
+        alert('New card created successfully!');
+      },
+      error: (error) => {
+        console.error('Error creating new card:', error);
+        alert('Error creating new card. Please try again.');
+      }
+    });
+  }
+
+  // Delete current card
+  deleteCurrentCard(): void {
+    if (this.currentCard && confirm('Are you sure you want to delete this card? This action cannot be undone.')) {
+      this.accreditationService.deleteCard(this.currentCard.uuid).subscribe({
+        next: () => {
+          console.log('Card deleted successfully');
+          alert('Card deleted successfully!');
+        },
+        error: (error) => {
+          console.error('Error deleting card:', error);
+          alert('Error deleting card. Please try again.');
+        }
+      });
+    }
+  }
+
+  // Get function color for display
+  getFunctionColor(functionType: string): string {
+    const colors = {
+      athlete: '#28a745',
+      official: '#007bff',
+      media: '#ffc107',
+      vip: '#dc3545',
+      staff: '#6c757d',
+      delegate: '#17a2b8'
+    };
+    return colors[functionType as keyof typeof colors] || '#6c757d';
+  }
+
+  // Get display name for card
+  getCardDisplayName(card: AccreditationCard): string {
+    const data = this.accreditationService.parseCardData(card);
+    return data ? data.name : 'Unknown Card';
+  }
+
+  // Get function type for card
+  getCardFunction(card: AccreditationCard): string {
+    const data = this.accreditationService.parseCardData(card);
+    return data ? data.function : 'unknown';
   }
 }

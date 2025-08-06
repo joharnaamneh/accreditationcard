@@ -3,16 +3,10 @@
   <header class="app-header">
     <h1>🎫 Accreditation Card Manager</h1>
     <div class="view-toggle">
-      <button
-        (click)="switchToViewMode()"
-        [class.active]="viewMode === 'view'"
-        class="toggle-btn view-btn">
+      <button (click)="switchToViewMode()" [class.active]="viewMode === 'view'" class="toggle-btn view-btn">
         👁️ View Mode
       </button>
-      <button
-        (click)="switchToEditMode()"
-        [class.active]="viewMode === 'edit'"
-        class="toggle-btn edit-btn">
+      <button (click)="switchToEditMode()" [class.active]="viewMode === 'edit'" class="toggle-btn edit-btn">
         ✏️ Edit Mode
       </button>
     </div>
@@ -26,19 +20,19 @@
         <h3>📋 Select Card to Display:</h3>
         <div class="selector-buttons">
           <button
-            *ngFor="let card of sampleCards; let i = index"
+            *ngFor="let card of cards; let i = index"
             (click)="selectCard(i)"
             [class.active]="selectedCardIndex === i"
-            [class]="'btn-' + card.function">
-            {{ card.name }} ({{ card.function.toUpperCase() }})
+            [class]="'btn-' + getCardFunction(card)">
+            {{getCardDisplayName(card)}} ({{getCardFunction(card).toUpperCase()}})
           </button>
         </div>
       </div>
 
       <!-- Current Card Display -->
-      <div class="current-card-section">
+      <div class="current-card-section" *ngIf="currentCard">
         <div class="card-header">
-          <h3>Current Card: {{ currentCard.name }}</h3>
+          <h3>Current Card: {{getCardDisplayName(currentCard)}}</h3>
           <div class="card-actions">
             <button (click)="duplicateCurrentCard()" class="btn-action btn-secondary">
               📄 Duplicate
@@ -66,11 +60,8 @@
         </div>
 
         <!-- Default Card Display -->
-        <div *ngIf="!customCardHtml">
-          <app-accreditation-card
-            [data]="currentCard"
-            #accreditationCard>
-          </app-accreditation-card>
+        <div *ngIf="!customCardHtml && currentCardData">
+          <app-accreditation-card [data]="currentCardData" #accreditationCard></app-accreditation-card>
         </div>
       </div>
 
@@ -84,6 +75,12 @@
           <button (click)="loadCardsFromStorage()" class="btn-global btn-info">
             📂 Load Cards
           </button>
+          <button (click)="createNewCard()" class="btn-global btn-success">
+            ➕ Create New Card
+          </button>
+          <button (click)="deleteCurrentCard()" class="btn-global btn-danger" *ngIf="currentCard">
+            🗑️ Delete Current Card
+          </button>
         </div>
       </div>
     </div>
@@ -91,10 +88,16 @@
     <!-- Edit Mode -->
     <div *ngIf="viewMode === 'edit'" class="edit-mode">
       <app-card-editor
-        [cardData]="currentCard"
+        *ngIf="currentCardData"
+        [cardData]="currentCardData"
         (cardUpdated)="onCardUpdated($event)"
         (dataUpdated)="onCardDataUpdated($event)">
       </app-card-editor>
+    </div>
+
+    <!-- Loading indicator -->
+    <div *ngIf="isLoading" class="loading-overlay">
+      <div class="loading-spinner">Loading...</div>
     </div>
   </main>
 

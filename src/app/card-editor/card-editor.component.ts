@@ -1,6 +1,6 @@
 // card-editor.component.ts
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import { Accreditation } from '../shared/models/accreditation.model';
+import { AccreditationData } from '../shared/models/accreditation.model';
 
 export interface PlaceholderElement {
   id: string;
@@ -30,9 +30,9 @@ export interface CardFormat {
   styleUrls: ['./card-editor.component.scss']
 })
 export class CardEditorComponent implements OnInit {
-  @Input() cardData!: Accreditation;
-  @Output() cardUpdated = new EventEmitter<{html: string, css: string}>();
-  @Output() dataUpdated = new EventEmitter<Accreditation>();
+  @Input() cardData!: AccreditationData;
+  @Output() cardUpdated = new EventEmitter<{ html: string, css: string }>();
+  @Output() dataUpdated = new EventEmitter<AccreditationData>();
 
   // Template-Management
   currentSide: 'front' | 'back' = 'front';
@@ -177,7 +177,6 @@ export class CardEditorComponent implements OnInit {
     this.isMovingElement = true;
     this.movingElement = element;
     this.selectedElement = element;
-
     this.moveStartPos = {
       x: event.clientX,
       y: event.clientY,
@@ -204,7 +203,6 @@ export class CardEditorComponent implements OnInit {
   onMouseUp() {
     this.isMovingElement = false;
     this.movingElement = null;
-
     document.removeEventListener('mousemove', this.onMouseMove.bind(this));
     document.removeEventListener('mouseup', this.onMouseUp.bind(this));
   }
@@ -247,7 +245,7 @@ export class CardEditorComponent implements OnInit {
     }
   }
 
-  // Seitenwechseln
+  // Seitenwechsel
   switchSide(side: 'front' | 'back') {
     this.currentSide = side;
     this.selectedElement = null;
@@ -281,7 +279,7 @@ export class CardEditorComponent implements OnInit {
     const backElements = this.placeholderElements.filter(el => el.side === 'back');
 
     return `
-      <div class="custom-card-container" style="width:${this.selectedFormat.width}mm;height:${this.selectedFormat.height}mm;">
+      <div class="custom-card-container" style="width: ${this.selectedFormat.width}mm; height: ${this.selectedFormat.height}mm;">
         <div class="card-side front">
           ${this.generateElementsHTML(frontElements)}
         </div>
@@ -298,10 +296,19 @@ export class CardEditorComponent implements OnInit {
       const fontSize = el.fontSize || this.calculateOptimalFontSize(value, el.width, el.height);
 
       if (el.type === 'image') {
-        return `<img src="${value}" alt="${el.label}" style="position:absolute;left:${el.x}px;top:${el.y}px;width:${el.width}px;height:${el.height}px;object-fit:cover;" onerror="this.style.display='none'"/>`;
+        return `
+          <img src="${value}" alt="${el.label}"
+               style="position: absolute; left: ${el.x}px; top: ${el.y}px; width: ${el.width}px; height: ${el.height}px; object-fit: cover;"
+               onerror="this.style.display='none'"/>
+        `;
       }
 
-      return `<div class="placeholder-element" style="position:absolute;left:${el.x}px;top:${el.y}px;width:${el.width}px;height:${el.height}px;font-size:${fontSize}px;overflow:hidden;text-overflow:ellipsis;">${value}</div>`;
+      return `
+        <div class="placeholder-element"
+             style="position: absolute; left: ${el.x}px; top: ${el.y}px; width: ${el.width}px; height: ${el.height}px; font-size: ${fontSize}px; overflow: hidden; text-overflow: ellipsis;">
+          ${value}
+        </div>
+      `;
     }).join('');
   }
 
