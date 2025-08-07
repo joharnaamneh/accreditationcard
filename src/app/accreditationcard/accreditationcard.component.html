@@ -1,122 +1,135 @@
 <!-- accreditationcard.component.html -->
-<div class="card-container">
-  <!-- Front of card -->
-  <div class="card front" [attr.data-function]="data.function">
-    <div class="event-header">
-      <div class="swiss-flag"></div>
-      <span class="event-title">
-        5th CISM<br>
-        Military World Winter Games<br>
-        2025
-      </span>
-      <div class="cism-logo"></div>
+<div class="card-container" #cardWrapper>
+  <!-- Front Side -->
+  <div class="card-side front" [style.width.mm]="cardFormat?.width || 148" [style.height.mm]="cardFormat?.height || 105">
+    <!-- Background -->
+    <div class="card-background">
+      <img *ngIf="data.eventImageUrl" [src]="data.eventImageUrl" alt="Event Background" class="background-image">
     </div>
 
-    <div class="main-content">
-      <div class="photo-section">
-        <img [src]="data.imageUrl" alt="Portrait" class="portrait">
+    <!-- Header with Function Color -->
+    <div class="card-header" [style.background-color]="getFunctionColor()">
+      <span class="function-badge">{{ data.function.toUpperCase() }}</span>
+      <span class="card-id">{{ data.cardId }}</span>
+    </div>
+
+    <!-- Main Content -->
+    <div class="card-content">
+      <!-- Photo Section -->
+      <div class="photo-section" *ngIf="data.imageUrl">
+        <img [src]="data.imageUrl" [alt]="data.name" class="participant-photo"
+             onerror="this.style.display='none'">
       </div>
 
-      <div class="person-info">
-        <p class="rank"><strong>{{ data.rank }}</strong></p>
-        <h2 class="name">{{ data.name }}</h2>
-        <p class="role">{{ data.role }}</p>
-        <p class="discipline">{{ data.discipline }}</p>
-        <p class="subdiscipline">{{ data.subdiscipline }}</p>
+      <!-- Info Section -->
+      <div class="info-section">
+        <div class="name-section">
+          <h2 class="participant-name" [title]="data.name">{{ data.name }}</h2>
+          <p class="participant-rank" *ngIf="data.rank" [title]="data.rank">{{ data.rank }}</p>
+        </div>
+
+        <div class="details-section">
+          <div class="detail-row" *ngIf="data.country">
+            <span class="detail-label">Country:</span>
+            <span class="detail-value">
+              <span *ngIf="data.country_code" class="country-code">{{ data.country_code }}</span>
+              {{ data.country }}
+            </span>
+          </div>
+
+          <div class="detail-row" *ngIf="data.discipline">
+            <span class="detail-label">Discipline:</span>
+            <span class="detail-value" [title]="data.discipline">{{ data.discipline }}</span>
+          </div>
+
+          <div class="detail-row" *ngIf="data.subdiscipline">
+            <span class="detail-label">Sub-discipline:</span>
+            <span class="detail-value" [title]="data.subdiscipline">{{ data.subdiscipline }}</span>
+          </div>
+
+          <div class="detail-row" *ngIf="data.accreditation">
+            <span class="detail-label">Accreditation:</span>
+            <span class="detail-value" [title]="data.accreditation">{{ data.accreditation }}</span>
+          </div>
+        </div>
+
+        <!-- Zones Section -->
+        <div class="zones-section" *ngIf="data.zones && data.zones.length > 0">
+          <span class="zones-label">Access Zones:</span>
+          <div class="zones-list">
+            <span *ngFor="let zone of data.zones; let last = last"
+                  class="zone-badge">{{ zone }}<span *ngIf="!last">,</span></span>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="accreditation-section">
-      <div class="accreditation-badges">
-        <span class="badge accred" [style.background-color]="getFunctionColor()">
-          {{ data.accreditation }}
-        </span>
-        <span class="badge country">{{ data.country_code }}</span>
-      </div>
-      <p class="country-name"><strong>{{ data.country.toUpperCase() }}</strong></p>
-    </div>
-
-    <div class="zones">
-      <span *ngFor="let zone of data.zones"
-            class="zone"
-            [class.vip]="zone === 'VIP'">
-        {{ zone }}
-      </span>
-    </div>
-
-    <div class="card-footer">
-
-
-      <div class="event-logo">
-        <img [src]="data.eventImageUrl" alt="Event Logo" class="event-image">
+    <!-- QR Code Section -->
+    <div class="qr-section" *ngIf="data.qr_event">
+      <div class="qr-placeholder">
+        <span class="qr-text">QR: {{ data.qr_event }}</span>
       </div>
     </div>
   </div>
 
-  <!-- Back of card -->
-  <div class="card back" [attr.data-function]="data.function">
-    <div class="qr-section">
-      <div class="qr-container">
-        <img [src]="data.qr_sbb" alt="QR SBB">
-        <div class="qr-label sbb">SBB CFF FFS</div>
-      </div>
-      <div class="qr-container">
-        <img [src]="data.qr_event" alt="QR Event">
-        <div class="qr-label event">Event-Website</div>
-      </div>
+  <!-- Back Side -->
+  <div class="card-side back" [style.width.mm]="cardFormat?.width || 148" [style.height.mm]="cardFormat?.height || 105">
+    <!-- Background -->
+    <div class="card-background">
+      <img *ngIf="data.eventImageUrl" [src]="data.eventImageUrl" alt="Event Background" class="background-image">
     </div>
 
-    <div class="info-sections">
-      <div class="info-group">
-        <div class="info-title">LU</div>
-        <div class="info-content">
-          Lucerne<br>
-          Main venue for events<br>
-          Access with accreditation
-        </div>
-      </div>
-
-      <div class="info-group">
-        <div class="info-title">🍴</div>
-        <div class="info-content">
-          Food at accommodation<br>
-          Breakfast: 06:30-09:00<br>
-          Lunch: 12:00-14:00<br>
-          Dinner: 18:00-20:00
-        </div>
-      </div>
-
-      <div class="info-group">
-        <div class="info-title">🚌</div>
-        <div class="info-content">
-          Shuttle Service<br>
-          Every 30 minutes<br>
-          Hotel ↔ Venues<br>
-          06:00-22:00
-        </div>
-      </div>
-
-      <div class="info-group emergency">
-        <div class="info-title">144</div>
-        <div class="info-content">
-          Ambulance<br>
-          Emergency: 144<br>
-          Police: 117<br>
-          Fire: 118<br>
-          Event Control: +41 41 123 45 67<br>
-          Medical Center: Venue A, Level 1<br>
-          Lost & Found: Info Desk
-        </div>
-      </div>
+    <!-- Back Header -->
+    <div class="back-header">
+      <h3>Additional Information</h3>
     </div>
 
-    <div class="footer-logos">
-      <span class="sponsor">Swisscom</span>
-      <span class="transport">SBB CFF FFS</span>
-    </div>
+    <!-- Back Content -->
+    <div class="back-content">
+      <div class="back-section" *ngIf="data.validFrom || data.validUntil">
+        <h4>Validity Period</h4>
+        <div class="validity-info">
+          <div *ngIf="data.validFrom" class="validity-row">
+            <strong>Valid From:</strong> {{ formatDate(data.validFrom) }}
+          </div>
+          <div *ngIf="data.validUntil" class="validity-row">
+            <strong>Valid Until:</strong> {{ formatDate(data.validUntil) }}
+          </div>
+        </div>
+      </div>
 
-    <div class="card-id">
-      ID: {{ data.cardId }}
+      <div class="back-section" *ngIf="data.transportOptions && data.transportOptions.length > 0">
+        <h4>Transport Options</h4>
+        <div class="transport-list">
+          <span *ngFor="let transport of data.transportOptions; let last = last"
+                class="transport-item">{{ transport }}<span *ngIf="!last">, </span></span>
+        </div>
+      </div>
+
+      <div class="back-section" *ngIf="data.mealCategories && data.mealCategories.length > 0">
+        <h4>Meal Categories</h4>
+        <div class="meal-list">
+          <span *ngFor="let meal of data.mealCategories; let last = last"
+                class="meal-item">{{ meal }}<span *ngIf="!last">, </span></span>
+        </div>
+      </div>
+
+      <div class="back-section" *ngIf="data.accommodation">
+        <h4>Accommodation</h4>
+        <p class="accommodation-info">{{ data.accommodation }}</p>
+      </div>
+
+      <div class="back-section" *ngIf="data.emergencyContact">
+        <h4>Emergency Contact</h4>
+        <p class="emergency-info">{{ data.emergencyContact }}</p>
+      </div>
+
+      <!-- SBB QR Code -->
+      <div class="sbb-qr-section" *ngIf="data.qr_sbb">
+        <div class="qr-placeholder">
+          <span class="qr-text">SBB QR: {{ data.qr_sbb }}</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>

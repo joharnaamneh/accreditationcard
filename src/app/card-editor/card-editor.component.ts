@@ -15,6 +15,14 @@ export interface PlaceholderElement {
   maxLength?: number;
   options?: string[]; // für dropdown/multiselect
   side: 'front' | 'back';
+
+  // Additional properties that were missing
+  multiSelectSeparator?: string;
+  truncateMode?: 'ellipsis' | 'cut' | 'wrap';
+  autoFontSize?: boolean;
+  minFontSize?: number;
+  maxFontSize?: number;
+  selected?: boolean;
 }
 
 export interface CardFormat {
@@ -255,13 +263,13 @@ export class CardEditorComponent implements OnInit {
     return this.placeholderElements.filter(el => el.side === this.currentSide);
   }
 
-  // Text-Optimierung basierend auf Container-Größe
-  calculateOptimalFontSize(text: string, containerWidth: number, containerHeight: number): number {
+// Text-Optimierung basierend auf Container-Größe
+  calculateOptimalFontSize(text: string, containerWidth: number, containerHeight: number, minSize: number = 8, maxSize: number = 48): number {
     const baseSize = 14;
     const textLength = text.length;
     const widthFactor = containerWidth / (textLength * 0.6); // Approximation
     const heightFactor = containerHeight / 1.2;
-    return Math.min(Math.max(Math.min(widthFactor, heightFactor), 8), 24);
+    return Math.min(Math.max(Math.min(widthFactor, heightFactor), minSize), maxSize);
   }
 
   // Multiselect Logik
@@ -420,6 +428,438 @@ export class CardEditorComponent implements OnInit {
         }
       };
       reader.readAsText(file);
+    }
+  }
+  // Additional methods to add to card-editor.component.ts
+
+// Fix for options handling in multiselect/dropdown
+  updateElementOptions(element: PlaceholderElement, optionsText: string): void {
+    if (element.type === 'multiselect' || element.type === 'dropdown') {
+      element.options = optionsText.split(',').map(opt => opt.trim()).filter(opt => opt.length > 0);
+      this.updateElement();
+    }
+  }
+
+// Get options as comma-separated string for display
+  getElementOptionsText(element: PlaceholderElement): string {
+    return element.options ? element.options.join(', ') : '';
+  }
+
+// Set options from textarea input
+  setElementOptions(element: PlaceholderElement, event: any): void {
+    const optionsText = event.target.value;
+    element.options = optionsText.split(',').map((opt: string) => opt.trim()).filter((opt: string) => opt.length > 0);
+    this.updateElement();
+  }
+
+// Format date value for display
+  formatDateValue(value: any): string {
+    if (!value) return '';
+    try {
+      const date = new Date(value);
+      if (isNaN(date.getTime())) return String(value);
+      return date.toLocaleDateString('de-CH');
+    } catch {
+      return String(value);
+    }
+  }
+
+// Handle image scaling
+  scaleImageToFit(imgElement: HTMLImageElement, maxWidth: number, maxHeight: number): {width: number, height: number} {
+    const imgWidth = imgElement.naturalWidth;
+    const imgHeight = imgElement.naturalHeight;
+
+    if (imgWidth === 0 || imgHeight === 0) {
+      return { width: maxWidth, height: maxHeight };
+    }
+
+    const widthRatio = maxWidth / imgWidth;
+    const heightRatio = maxHeight / imgHeight;
+    const ratio = Math.min(widthRatio, heightRatio);
+
+    return {
+      width: imgWidth * ratio,
+      height: imgHeight * ratio
+    };
+  }
+
+// Enhanced element value getter with better formatting
+  getElementValueFormatted(element: PlaceholderElement): string {
+    const value = (this.cardData as any)[element.dataKey];
+
+    if (!value) return element.label || '';
+
+    switch (element.type) {
+      case 'multiselect':
+        if (Array.isArray(value)) {
+          const separator = element.multiSelectSeparator || ', ';
+          if (element.options && element.options.length > 0) {
+            return value.filter(val => element.options!.includes(val)).join(separator);
+          }
+          return value.join(separator);
+        }
+        return String(value);
+
+      case 'dropdown':
+        return String(value);
+
+      case 'date':
+        return this.formatDateValue(value);
+
+      case 'text':
+        const text = String(value);
+        if (element.maxLength && text.length > element.maxLength) {
+          switch (element.truncateMode || 'ellipsis') {
+            case 'cut':
+              return text.substring(0, element.maxLength);
+            case 'ellipsis':
+              return text.substring(0, element.maxLength - 3) + '...';
+            case 'wrap':
+            default:
+              return text;
+          }
+        }
+        return text;
+
+      case 'image':
+        return value; // Return URL for images
+
+      default:
+        return String(value);
+    }
+  }
+
+// Auto-resize font based on content and container
+  autoResizeFont(element: PlaceholderElement): number {
+    if (!element.autoFontSize) {
+      return element.fontSize || 14;
+    }
+    const text = this.getElementValueFormatted(element);
+    const minSize = element.minFontSize || 8;
+    const maxSize = element.maxFontSize || 48;
+    return this.calculateOptimalFontSize(text, element.width, element.height, minSize, maxSize);
+  }
+
+// Better canvas scaling for different formats
+  getCanvasScale(): number {
+    const baseWidth = 148; // A5 width in mm
+    const scale = Math.min(3, Math.max(1, baseWidth / this.selectedFormat.width));
+    return scale;
+  }
+
+// Snap to grid functionality
+  snapToGrid(value: number, gridSize: number = 5): number {
+    return Math.round(value / gridSize) * gridSize;
+  }
+
+// Apply snap to grid when moving elements
+  onMouseMoveWithSnap(event: MouseEvent): void {
+    if (!this.isMovingElement || !this.movingElement) return;
+
+    const deltaX = event.clientX - this.moveStartPos.x;
+    const deltaY = event.clientY - this.moveStartPos.y;
+
+    const newX = this.snapToGrid(Math.max(0, this.moveStartPos.elementX + deltaX));
+    const newY = this.snapToGrid(Math.max(0, this.moveStartPos.elementY + deltaY));
+
+    // Keep element within canvas bounds
+    const maxX = (this.selectedFormat.width * this.getCanvasScale()) - this.movingElement.width;
+    const maxY = (this.selectedFormat.height * this.getCanvasScale()) - this.movingElement.height;
+
+    this.movingElement.x = Math.min(newX, Math.max(0, maxX));
+    this.movingElement.y = Math.min(newY, Math.max(0, maxY));
+
+    this.updateElement();
+  }
+
+// Validate element placement
+  validateElementPlacement(element: PlaceholderElement): boolean {
+    const maxX = (this.selectedFormat.width * this.getCanvasScale()) - element.width;
+    const maxY = (this.selectedFormat.height * this.getCanvasScale()) - element.height;
+
+    if (element.x > maxX || element.y > maxY || element.x < 0 || element.y < 0) {
+      return false;
+    }
+
+    return true;
+  }
+
+// Generate better card styles with responsive design
+  generateResponsiveCardCSS(): string {
+    return `
+    .custom-card-container {
+      width: ${this.selectedFormat.width}mm;
+      height: ${this.selectedFormat.height}mm;
+      position: relative;
+      background: white;
+      border: 1px solid #ddd;
+      margin: 20px auto;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+    }
+
+    .card-side {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      page-break-after: always;
+    }
+
+    .card-side.back {
+      display: none;
+    }
+
+    .placeholder-element {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px;
+      background: rgba(255, 255, 255, 0.9);
+      font-family: Arial, sans-serif;
+      word-wrap: break-word;
+      line-height: 1.2;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    .placeholder-element img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    @media print {
+      .custom-card-container {
+        margin: 0;
+        border: none;
+        box-shadow: none;
+      }
+
+      .card-side.back {
+        display: block;
+        page-break-before: always;
+      }
+
+      .placeholder-element {
+        border: none !important;
+        background: transparent !important;
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+
+      .placeholder-element * {
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+    }
+
+    @media screen and (max-width: 768px) {
+      .custom-card-container {
+        width: 100%;
+        height: auto;
+        aspect-ratio: ${this.selectedFormat.width}/${this.selectedFormat.height};
+      }
+    }
+  `;
+  }
+
+// Enhanced template export with better error handling
+  exportTemplateEnhanced(): void {
+    try {
+      const html = this.generateCardHTML();
+      const css = this.generateResponsiveCardCSS();
+
+      // Validate template before export
+      if (this.placeholderElements.length === 0) {
+        alert('No elements to export. Please add some elements first.');
+        return;
+      }
+
+      // Check if all elements are within bounds
+      const invalidElements = this.placeholderElements.filter(el => !this.validateElementPlacement(el));
+      if (invalidElements.length > 0) {
+        const proceed = confirm(`${invalidElements.length} elements are outside the canvas bounds. Export anyway?`);
+        if (!proceed) return;
+      }
+
+      this.cardUpdated.emit({ html, css });
+
+      // Show success message
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #28a745;
+      color: white;
+      padding: 1rem;
+      border-radius: 4px;
+      z-index: 10000;
+      animation: slideIn 0.3s ease;
+    `;
+      toast.textContent = 'Template applied successfully!';
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error exporting template:', error);
+      alert('Error exporting template. Please try again.');
+    }
+  }
+
+// Batch operations for elements
+// Batch operations for elements
+  selectAllElements(): void {
+    // Implementation for selecting all elements
+    this.getCurrentSideElements().forEach(el => {
+      (el as any).selected = true;
+    });
+  }
+
+  deleteSelectedElements(): void {
+    const elementsToDelete = this.placeholderElements.filter(el => (el as any).selected);
+    if (elementsToDelete.length === 0) return;
+
+    if (confirm(`Delete ${elementsToDelete.length} selected elements?`)) {
+      elementsToDelete.forEach(el => this.deleteElement(el));
+      this.selectedElement = null;
+    }
+  }
+
+  alignElements(alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom'): void {
+    const selectedElements = this.getCurrentSideElements().filter(el => (el as any).selected || el === this.selectedElement);
+    if (selectedElements.length < 2) return;
+
+    switch (alignment) {
+      case 'left':
+        const minX = Math.min(...selectedElements.map(el => el.x));
+        selectedElements.forEach(el => el.x = minX);
+        break;
+      case 'right':
+        const maxX = Math.max(...selectedElements.map(el => el.x + el.width));
+        selectedElements.forEach(el => el.x = maxX - el.width);
+        break;
+      case 'center':
+        const centerX = selectedElements.reduce((sum, el) => sum + el.x + el.width/2, 0) / selectedElements.length;
+        selectedElements.forEach(el => el.x = centerX - el.width/2);
+        break;
+      case 'top':
+        const minY = Math.min(...selectedElements.map(el => el.y));
+        selectedElements.forEach(el => el.y = minY);
+        break;
+      case 'bottom':
+        const maxY = Math.max(...selectedElements.map(el => el.y + el.height));
+        selectedElements.forEach(el => el.y = maxY - el.height);
+        break;
+      case 'middle':
+        const centerY = selectedElements.reduce((sum, el) => sum + el.y + el.height/2, 0) / selectedElements.length;
+        selectedElements.forEach(el => el.y = centerY - el.height/2);
+        break;
+    }
+
+    this.updateElement();
+  }
+
+// Keyboard shortcuts handler
+  handleKeyboardShortcuts(event: KeyboardEvent): void {
+    if (!this.selectedElement) return;
+
+    const step = event.shiftKey ? 10 : 1;
+
+    switch (event.key) {
+      case 'ArrowLeft':
+        event.preventDefault();
+        this.selectedElement.x = Math.max(0, this.selectedElement.x - step);
+        this.updateElement();
+        break;
+      case 'ArrowRight':
+        event.preventDefault();
+        const maxX = (this.selectedFormat.width * this.getCanvasScale()) - this.selectedElement.width;
+        this.selectedElement.x = Math.min(maxX, this.selectedElement.x + step);
+        this.updateElement();
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        this.selectedElement.y = Math.max(0, this.selectedElement.y - step);
+        this.updateElement();
+        break;
+      case 'ArrowDown':
+        event.preventDefault();
+        const maxY = (this.selectedFormat.height * this.getCanvasScale()) - this.selectedElement.height;
+        this.selectedElement.y = Math.min(maxY, this.selectedElement.y + step);
+        this.updateElement();
+        break;
+      case 'Delete':
+      case 'Backspace':
+        event.preventDefault();
+        this.deleteElement(this.selectedElement);
+        break;
+    }
+  }
+
+// Copy/Paste functionality
+  copyElement(element: PlaceholderElement): void {
+    const elementCopy = JSON.parse(JSON.stringify(element));
+    elementCopy.id = `${element.type}_${Date.now()}`;
+    elementCopy.x += 20;
+    elementCopy.y += 20;
+    elementCopy.label = `${element.label} (Copy)`;
+
+    this.placeholderElements.push(elementCopy);
+    this.selectedElement = elementCopy;
+  }
+
+// Layer management
+  bringToFront(element: PlaceholderElement): void {
+    const index = this.placeholderElements.indexOf(element);
+    if (index > -1) {
+      this.placeholderElements.splice(index, 1);
+      this.placeholderElements.push(element);
+    }
+  }
+
+  sendToBack(element: PlaceholderElement): void {
+    const index = this.placeholderElements.indexOf(element);
+    if (index > -1) {
+      this.placeholderElements.splice(index, 1);
+      this.placeholderElements.unshift(element);
+    }
+  }
+
+// Undo/Redo functionality (basic implementation)
+  private history: PlaceholderElement[][] = [];
+  private historyIndex = -1;
+
+  saveToHistory(): void {
+    this.history = this.history.slice(0, this.historyIndex + 1);
+    this.history.push(JSON.parse(JSON.stringify(this.placeholderElements)));
+    this.historyIndex = this.history.length - 1;
+
+    // Limit history to 50 steps
+    if (this.history.length > 50) {
+      this.history.shift();
+      this.historyIndex--;
+    }
+  }
+
+  undo(): void {
+    if (this.historyIndex > 0) {
+      this.historyIndex--;
+      this.placeholderElements = JSON.parse(JSON.stringify(this.history[this.historyIndex]));
+      this.selectedElement = null;
+    }
+  }
+
+  redo(): void {
+    if (this.historyIndex < this.history.length - 1) {
+      this.historyIndex++;
+      this.placeholderElements = JSON.parse(JSON.stringify(this.history[this.historyIndex]));
+      this.selectedElement = null;
     }
   }
 }

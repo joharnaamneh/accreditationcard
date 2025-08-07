@@ -143,42 +143,6 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Create a new card based on the current one
-  duplicateCurrentCard(): void {
-    if (this.currentCard) {
-      this.accreditationService.duplicateCard(this.currentCard).subscribe({
-        next: (newCard) => {
-          console.log('Card duplicated successfully:', newCard);
-          // The service automatically updates the cards list and sets the new card as current
-          alert('Card duplicated successfully!');
-        },
-        error: (error) => {
-          console.error('Error duplicating card:', error);
-          alert('Error duplicating card. Please try again.');
-        }
-      });
-    }
-  }
-
-  // Reset current card to a default state
-  resetCurrentCard(): void {
-    if (this.currentCard && confirm('Are you sure you want to reset this card to a default state?')) {
-      const defaultTemplate = TemplateUtils.createDefaultTemplate();
-      this.accreditationService.updateCard(this.currentCard.uuid, defaultTemplate).subscribe({
-        next: (updatedCard) => {
-          this.customCardHtml = '';
-          this.customCardCss = '';
-          console.log('Card reset successfully:', updatedCard);
-          alert('Card reset successfully!');
-        },
-        error: (error) => {
-          console.error('Error resetting card:', error);
-          alert('Error resetting card. Please try again.');
-        }
-      });
-    }
-  }
-
   // Create a new empty card
   createNewCard(): void {
     this.accreditationService.createEmptyCard().subscribe({

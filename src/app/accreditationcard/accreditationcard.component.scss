@@ -1,337 +1,358 @@
 // accreditationcard.component.scss
 .card-container {
   display: flex;
-  gap: 2rem;
-  font-family: Arial, sans-serif;
+  gap: 1rem;
   margin: 1rem 0;
+
+  @media print {
+    gap: 0;
+    margin: 0;
+    page-break-inside: avoid;
+
+    .card-side.back {
+      page-break-before: always;
+    }
+  }
 }
 
-.card {
-  border: 2px solid #000;
-  width: 350px;
-  height: 550px;
-  background: #e6f3ff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.card-side {
   position: relative;
+  background: white;
+  border: 2px solid #ddd;
   border-radius: 8px;
   overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  font-family: 'Arial', sans-serif;
 
-  // Function-based color coding
-  &[data-function="athlete"] { border-left: 6px solid #28a745; }
-  &[data-function="official"] { border-left: 6px solid #007bff; }
-  &[data-function="media"] { border-left: 6px solid #ffc107; }
-  &[data-function="vip"] { border-left: 6px solid #dc3545; }
-  &[data-function="staff"] { border-left: 6px solid #6c757d; }
-  &[data-function="delegate"] { border-left: 6px solid #17a2b8; }
-}
-
-.front {
-  .event-header {
-    background: #fff;
-    padding: 0.75rem;
-    margin: -2px -2px 0 -2px;
-    border-bottom: 2px solid #000;
-    text-align: center;
-    position: relative;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    .swiss-flag {
-      position: absolute;
-      left: 1rem;
-      width: 30px;
-      height: 20px;
-      background: red;
-
-      &::before,
-      &::after {
-        content: '';
-        position: absolute;
-        background: white;
-      }
-
-      &::before {
-        width: 6px;
-        height: 20px;
-        left: 12px;
-        top: 0;
-      }
-
-      &::after {
-        width: 30px;
-        height: 6px;
-        top: 7px;
-        left: 0;
-      }
-    }
-
-    .event-title {
-      font-weight: bold;
-      font-size: 0.85rem;
-      line-height: 1.2;
-    }
-
-    .cism-logo {
-      position: absolute;
-      right: 1rem;
-      width: 30px;
-      height: 30px;
-      background: orange;
-      border-radius: 50%;
-    }
+  @media print {
+    border: 1px solid #000;
+    border-radius: 0;
+    box-shadow: none;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
   }
 
-  .main-content {
-    padding: 1.5rem 1rem 1rem;
-    display: flex;
-    gap: 1rem;
-
-    .photo-section {
-      flex-shrink: 0;
-
-      .portrait {
-        width: 80px;
-        height: 100px;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-        object-fit: cover;
-      }
-    }
-
-    .person-info {
-      flex: 1;
-
-      .rank {
-        margin: 0 0 0.3rem 0;
-        font-size: 0.9rem;
-        color: #666;
-      }
-
-      .name {
-        font-size: 1.1rem;
-        font-weight: bold;
-        margin: 0 0 0.5rem 0;
-        line-height: 1.2;
-      }
-
-      .role, .discipline, .subdiscipline {
-        margin: 0.2rem 0;
-        font-size: 0.85rem;
-        color: #333;
-      }
-    }
+  &.front {
+    // Default A5 landscape dimensions
+    width: 148mm;
+    height: 105mm;
   }
 
-  .accreditation-section {
-    padding: 0 1rem;
-    margin-bottom: 1rem;
-
-    .accreditation-badges {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
-
-      .badge {
-        padding: 0.4rem 1rem;
-        font-weight: bold;
-        font-size: 1.1rem;
-        color: white;
-        border-radius: 4px;
-
-        &.country {
-          background: #1e3a8a;
-        }
-      }
-    }
-
-    .country-name {
-      margin: 0;
-      font-size: 0.9rem;
-      font-weight: bold;
-    }
-  }
-
-  .zones {
-    padding: 0 1rem;
-    margin-bottom: 1.5rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-
-    .zone {
-      background: #fff;
-      border: 1px solid #ccc;
-      color: #333;
-      padding: 0.4rem 0.8rem;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      font-weight: 500;
-
-      &.vip {
-        background: #ff6600;
-        color: white;
-        font-weight: bold;
-      }
-    }
-  }
-
-  .card-footer {
-    position: absolute;
-    bottom: 1rem;
-    left: 1rem;
-    right: 1rem;
-
-    .bottom-numbers {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-
-      .number-group {
-        display: flex;
-        gap: 0.2rem;
-
-        &.left, &.right {
-          .number {
-            background: #000;
-          }
-        }
-      }
-
-      .number {
-        background: #333;
-        color: white;
-        width: 22px;
-        height: 22px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.8rem;
-        font-weight: bold;
-        border-radius: 2px;
-
-        &.center {
-          background: #000;
-          font-size: 1rem;
-        }
-      }
-    }
-
-    .event-logo {
-      text-align: center;
-
-      .event-image {
-        max-width: 120px;
-        max-height: 40px;
-        object-fit: contain;
-      }
-    }
+  &.back {
+    width: 148mm;
+    height: 105mm;
   }
 }
 
-.back {
-  background: #f8f9fa;
-  padding: 1rem;
+.card-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
 
-  .qr-section {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    justify-content: center;
-
-    .qr-container {
-      text-align: center;
-
-      img {
-        width: 80px;
-        height: 80px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-      }
-
-      .qr-label {
-        font-size: 0.7rem;
-        margin-top: 0.3rem;
-        padding: 0.2rem 0.4rem;
-        border-radius: 3px;
-        font-weight: bold;
-
-        &.sbb {
-          background: #ff6600;
-          color: white;
-        }
-
-        &.event {
-          background: #ffd700;
-          color: #000;
-        }
-      }
-    }
+  .background-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.1;
+    filter: grayscale(50%);
   }
+}
 
-  .info-sections {
-    .info-group {
-      margin: 0.8rem 0;
-      padding: 0.6rem;
-      background: #e6f3ff;
-      border-left: 4px solid #0066cc;
-      border-radius: 4px;
+.card-header {
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  padding: 0.5rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
 
-      &.emergency {
-        border-left-color: #dc3545;
-        background: #fff5f5;
-      }
-
-      .info-title {
-        font-weight: bold;
-        font-size: 0.9rem;
-        margin-bottom: 0.3rem;
-        color: #0066cc;
-      }
-
-      .info-content {
-        font-size: 0.75rem;
-        color: #555;
-        line-height: 1.3;
-      }
-    }
-  }
-
-  .footer-logos {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 1.5rem;
-    padding-top: 0.8rem;
-    border-top: 1px solid #ccc;
-
-    .sponsor, .transport {
-      font-size: 0.8rem;
-      font-weight: bold;
-      color: #666;
-    }
+  .function-badge {
+    font-size: 0.9rem;
+    letter-spacing: 1px;
   }
 
   .card-id {
-    position: absolute;
-    bottom: 0.5rem;
-    right: 1rem;
-    font-size: 0.7rem;
-    color: #999;
-    font-family: monospace;
+    font-size: 0.8rem;
+    opacity: 0.9;
   }
 }
 
-// Print styles
-@media print {
-  .card-container {
-    gap: 1rem;
+.card-content {
+  position: relative;
+  z-index: 2;
+  padding: 1rem;
+  height: calc(100% - 3rem);
+  display: flex;
+  gap: 1rem;
+}
+
+.photo-section {
+  flex-shrink: 0;
+  width: 3.2rem;
+  height: 4rem;
+
+  .participant-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+}
+
+.info-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.name-section {
+  .participant-name {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 0.2rem 0;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  .card {
-    box-shadow: none;
-    border: 2px solid #000;
+  .participant-rank {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0;
+    font-style: italic;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.details-section {
+  flex: 1;
+
+  .detail-row {
+    display: flex;
+    margin-bottom: 0.3rem;
+    font-size: 0.8rem;
+    line-height: 1.3;
+
+    .detail-label {
+      font-weight: 600;
+      color: #555;
+      width: 4rem;
+      flex-shrink: 0;
+    }
+
+    .detail-value {
+      color: #333;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      .country-code {
+        display: inline-block;
+        background: #f0f0f0;
+        padding: 0.1rem 0.3rem;
+        border-radius: 3px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        margin-right: 0.3rem;
+      }
+    }
+  }
+}
+
+.zones-section {
+  margin-top: 0.5rem;
+
+  .zones-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #555;
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+
+  .zones-list {
+    .zone-badge {
+      display: inline-block;
+      background: #e9ecef;
+      color: #495057;
+      padding: 0.15rem 0.4rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-right: 0.3rem;
+      margin-bottom: 0.2rem;
+    }
+  }
+}
+
+.qr-section {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+
+  .qr-placeholder {
+    width: 2rem;
+    height: 2rem;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    text-align: center;
+    color: #6c757d;
+    word-break: break-all;
+    padding: 0.1rem;
+  }
+}
+
+// Back side styles
+.back-header {
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(135deg, #6c757d, #495057);
+  color: white;
+  padding: 0.75rem 1rem;
+  text-align: center;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+}
+
+.back-content {
+  position: relative;
+  z-index: 2;
+  padding: 1rem;
+  height: calc(100% - 3.5rem);
+  overflow: hidden;
+}
+
+.back-section {
+  margin-bottom: 1rem;
+
+  h4 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #495057;
+    margin: 0 0 0.4rem 0;
+    padding-bottom: 0.2rem;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .validity-info {
+    .validity-row {
+      font-size: 0.8rem;
+      margin-bottom: 0.2rem;
+
+      strong {
+        color: #495057;
+      }
+    }
+  }
+
+  .transport-list, .meal-list {
+    font-size: 0.8rem;
+    color: #333;
+
+    .transport-item, .meal-item {
+      display: inline-block;
+      background: #f8f9fa;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      margin-right: 0.3rem;
+      margin-bottom: 0.2rem;
+    }
+  }
+
+  .accommodation-info, .emergency-info {
+    font-size: 0.8rem;
+    color: #333;
+    margin: 0;
+    line-height: 1.4;
+    word-wrap: break-word;
+  }
+}
+
+.sbb-qr-section {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+
+  .qr-placeholder {
+    width: 2.5rem;
+    height: 2.5rem;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    text-align: center;
+    color: #6c757d;
+    word-break: break-all;
+    padding: 0.1rem;
+  }
+}
+
+// Responsive adjustments
+@media screen and (max-width: 768px) {
+  .card-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card-side {
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 148/105;
+  }
+}
+
+// Print-specific styles
+@media print {
+  .card-container {
+    display: block;
+    margin: 0;
+    padding: 0;
+  }
+
+  .card-side {
+    margin: 0;
+    page-break-inside: avoid;
+    display: block;
+
+    &.back {
+      page-break-before: always;
+    }
+  }
+
+  .card-header,
+  .back-header {
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+
+  .zone-badge,
+  .transport-item,
+  .meal-item {
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
   }
 }
